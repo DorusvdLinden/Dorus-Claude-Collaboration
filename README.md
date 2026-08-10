@@ -7,10 +7,10 @@ out to matter regardless of what's being built.
 ## What's here
 
 [CLAUDE.md](./CLAUDE.md) - the actual rules, organized by theme (testing,
-documentation, git/deployment, decision-making, memory). Written in the
-same format Claude Code reads automatically from a project root, so a
-section can be copied verbatim into a new project's own `CLAUDE.md` as a
-starting point.
+documentation, artifact preservation, git/deployment, decision-making,
+working modes, memory). Written in the same format Claude Code reads
+automatically from a project root, so a section can be copied verbatim
+into a new project's own `CLAUDE.md` as a starting point.
 
 ## How to use this
 
