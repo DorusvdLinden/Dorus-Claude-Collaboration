@@ -84,10 +84,12 @@ update process.
   per logical change, message explains *why*, not just what) -> push ->
   deploy to the real target if one exists -> verify success on that
   target.
-- **Commit and push are standing-authorized once a change is tested and
-  working**, in Mode 2 and Mode 3 - this loop is itself the ongoing
-  authorization, not something to ask about each time. Only merging to
-  `main` and anything destructive (below) stay gated.
+- **Commit and push to the working branch are standing-authorized once a
+  change is tested and working**, in every mode (Mode 1 only after its
+  plan is confirmed and a branch exists - see Working modes below) - this
+  loop is itself the ongoing authorization, not something to ask about
+  each time. Only merging to `main` and anything destructive (below) stay
+  gated.
 - **Branch before editing, in every mode** (see Working modes below);
   merge to the main branch only when explicitly asked, and clean up
   (delete, locally and on the remote) after merging. When a mode produces
@@ -146,7 +148,9 @@ Mode 2 unless you say otherwise or the task itself calls for a different
 one. The modes change *when* confirmation happens, not whether the rest of
 this file's safety rules (destructive-action confirmation, branch-before-
 editing, merge-to-main only when asked) apply - those hold in all three.
-Commit/push authorization differs by mode - see below.
+Commit/push to the working branch is standing-authorized in every mode
+(Mode 1 only after its plan is confirmed) - merging to `main` always
+stays gated regardless of mode, see below.
 
 ### Mode 1 - Plan (deliberate)
 
@@ -162,6 +166,9 @@ architecturally significant / ambiguous / hard-to-reverse work.
   cheap.
 - Once the plan is confirmed, create a new feature branch before making
   any changes (name reflects the task, e.g. `feature/dark-mode-toggle`).
+- Commit and push to that branch as work proceeds, tested increment by
+  increment - same standing authorization as Mode 2, just gated on the
+  plan being confirmed first. Merging to `main` stays gated regardless.
 - Exit by presenting the final plan for confirmation, then move into
   Mode 2 to execute it.
 
@@ -194,6 +201,10 @@ runs.
 - Push as far as possible without stopping. Use judgment + memory +
   reasonable defaults for anything that would normally be a quick
   check-in.
+- Commit and push to the session branch(es) as work proceeds, tested
+  increment by increment - same standing authorization as Mode 2.
+  Merging to `main` stays gated for the end-of-session review, same as
+  every other irreversible action below.
 - When a genuine fork has multiple good options - not one
   obviously-best path - don't silently pick one. Build each viable
   option as its own branch (e.g. `away/dark-mode-css-vars` vs
