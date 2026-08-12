@@ -200,8 +200,10 @@ architecturally significant / ambiguous / hard-to-reverse work.
 - Commit and push to that branch as work proceeds, tested increment by
   increment - same standing authorization as Mode 2, just gated on the
   plan being confirmed first. Merging to `main` stays gated regardless.
-- Exit by presenting the final plan for confirmation, then move into
-  Mode 2 to execute it.
+- Exit by presenting the final plan for confirmation - save it to
+  `plans/<task-name>.md` in the repo as the durable record, not just
+  Claude Code's internal plan-mode state - then move into Mode 2 to
+  execute it.
 
 ### Mode 2 - Build (default)
 
