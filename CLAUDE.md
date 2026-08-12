@@ -24,15 +24,29 @@ update process.
   project has a real target (a physical device, a live server, a deployed
   environment), verify end-to-end on that target before calling the work
   finished, not just in a local/mocked environment.
+- **Generate a fresh verification artifact after every relevant change**,
+  not just when a change to it was intended, for any project with a
+  visual or rendered output (a screenshot, a mock render, a preview
+  image). Cheap to do, and it catches regressions in output nobody was
+  specifically watching for - never delete these, see Artifact
+  preservation.
 - **Root-cause with evidence before proposing a fix.** When something
   fails, gather direct evidence (logs, actual state, a minimal reproduction)
   before deciding why - and be willing to discard the first hypothesis and
   pivot the whole approach if the evidence contradicts it. Document what the
-  evidence actually showed, not just the conclusion reached.
+  evidence actually showed, not just the conclusion reached. For a
+  rejected credential specifically, check its literal content (length,
+  stray whitespace) before escalating - copy/paste truncation is a
+  common, easy-to-rule-out cause.
 - **Prefer an empirical check over an assumption when the cost is low.** If
   a risk can be tested directly and cheaply (e.g., a throwaway change on the
   real target, reverted after), do that instead of reasoning it out from
   documentation alone.
+- **Real/live checks aren't always sufficient for full coverage.** When a
+  behavior depends on conditions live data can't reliably trigger on any
+  given run (a rare event, a specific data combination), add deterministic
+  crafted fixtures for that specific case, while keeping real-pipeline
+  checks as the default for everything else.
 
 ## Documentation as a living system
 
@@ -70,6 +84,10 @@ update process.
   per logical change, message explains *why*, not just what) -> push ->
   deploy to the real target if one exists -> verify success on that
   target.
+- **Commit and push are standing-authorized once a change is tested and
+  working**, in Mode 2 and Mode 3 - this loop is itself the ongoing
+  authorization, not something to ask about each time. Only merging to
+  `main` and anything destructive (below) stay gated.
 - **Branch before editing, in every mode** (see Working modes below);
   merge to the main branch only when explicitly asked, and clean up
   (delete, locally and on the remote) after merging. When a mode produces
@@ -81,6 +99,16 @@ update process.
   fully merged) without confirming first, scoped to exactly what's being
   discarded - a prior approval doesn't extend to a new instance of the same
   category of action.
+- **A push isn't a completed deploy for a persistent/long-running
+  process.** A one-shot job picks up new code on its next run
+  automatically, but an already-running process keeps executing old
+  in-memory code until it's explicitly restarted/reloaded. Verify the
+  running process's actual start time against the source's, not just
+  that the file changed on disk, before trusting a "didn't work" result.
+- **Use scoped edits on remote or shared files that also hold live
+  secrets** (e.g. editing just the specific line rather than
+  opening/dumping the whole file), so credentials aren't needlessly
+  pulled into view or output.
 - **Investigate real-world risk before a big architecture change** when a
   cheap empirical check exists (a throwaway test against the actual target)
   rather than assuming from documentation - what's documented as the
@@ -116,8 +144,9 @@ update process.
 Three explicit modes govern how much I act before checking in. Default is
 Mode 2 unless you say otherwise or the task itself calls for a different
 one. The modes change *when* confirmation happens, not whether the rest of
-this file's safety rules (destructive-action confirmation, no unrequested
-commits, branch-before-editing) apply - those hold in all three.
+this file's safety rules (destructive-action confirmation, branch-before-
+editing, merge-to-main only when asked) apply - those hold in all three.
+Commit/push authorization differs by mode - see below.
 
 ### Mode 1 - Plan (deliberate)
 
@@ -150,8 +179,10 @@ Trigger: everyday tasks by default, or "let's just build this."
   `reset --hard`, deleting unmerged branches, etc.).
 - Narrate briefly at key moments - findings, direction changes,
   blockers - not a play-by-play.
-- Commits/pushes only when explicitly requested, as already stated in
-  this file.
+- Commit and push once a change is tested and working, per the Git &
+  deployment workflow loop above - that section is itself the standing
+  authorization, not something to ask about each time. Merging to
+  `main` stays gated.
 
 ### Mode 3 - Away (autonomous)
 
