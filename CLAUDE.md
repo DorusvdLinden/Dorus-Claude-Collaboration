@@ -50,6 +50,19 @@ update process.
 
 ## Documentation as a living system
 
+Every project keeps four minimal documents:
+
+- `README.md` - what the project is, plus a user manual covering install
+  and use.
+- `TODO.md` - Claude's own capture list: anything rough observed while
+  working but not fixed in the moment.
+- `IDEAS.md` - the user's own space for ideas, freely user-edited.
+- `CHANGES.md` - a numbered log of key changes, with current status.
+
+Add topic-specific docs (`docs/installation.md`, `docs/settings.md`,
+`docs/troubleshooting.md`, etc.) only once a topic outgrows a paragraph
+in the README - don't scaffold empty doc files upfront.
+
 - **Update docs in the same change that invalidates them**, not "later" -
   if a change renames a field, adds an option, or changes a default, the
   doc describing that thing changes in the same commit/session.
@@ -57,16 +70,24 @@ update process.
   change done, search for claims elsewhere in the docs that the change just
   contradicted (old names, "doesn't support X yet" statements that are now
   false) - these accumulate silently if only additions are made.
-- **Keep a running known-issues/ideas list.** Add to it when something
-  rough turns up; check items off when fixed rather than deleting them, so
-  the resolution history stays visible. Only delete a specific completed
-  entry when explicitly asked for that one item - never as general cleanup,
-  and never assume one deletion request extends to the rest of the list.
-- **Keep a numbered log of major decisions with current status** (active /
-  superseded-by-\<entry\> / rejected). This is what makes it possible to
-  reconstruct *why* something looks the way it does later, including
-  documenting approaches that were tried and rejected and why - without
-  this, rejected ideas tend to get silently re-proposed and re-litigated.
+- **`TODO.md` captures anything rough noticed while working**, even
+  outside the current task's scope (a bug spotted in passing, a
+  follow-up worth doing, a corner cut to keep scope tight) - add it
+  automatically, without being asked. Check items off when fixed rather
+  than deleting them, so resolution history stays visible. Only delete a
+  specific completed entry when explicitly asked for that one item -
+  never as general cleanup, and never assume one deletion request
+  extends to the rest of the list.
+- **`IDEAS.md` is the user's own space**, not Claude's to groom. Read it
+  for context when relevant; add or restructure entries in it only when
+  asked to - don't apply `TODO.md`'s add/check-off/never-delete
+  discipline here unprompted.
+- **`CHANGES.md` is a numbered log of major decisions with current
+  status** (active / superseded-by-\<entry\> / rejected). This is what
+  makes it possible to reconstruct *why* something looks the way it does
+  later, including documenting approaches that were tried and rejected
+  and why - without this, rejected ideas tend to get silently
+  re-proposed and re-litigated.
 
 ## Artifact preservation
 
@@ -77,6 +98,16 @@ update process.
   named file and leave every prior version in place. The only safe deletion
   is a file created and discarded within the same tool-call chain, before
   it was ever shown or referenced.
+- **Anything shown to the user during testing is kept, no exceptions.**
+  Once an artifact has been surfaced - shown in a message, referenced, used
+  to demonstrate a result - the "safe to delete" window above has closed;
+  it's a permanent record from that point on.
+- **Organize artifacts by task, not as a flat pile.** Create a new
+  subfolder per larger task or branch (e.g.
+  `mock_display_output/dark-mode-toggle/`) instead of writing directly
+  into the top-level output folder, so a given iteration's artifacts can
+  be found back easily later. Small checks within an already-scoped task
+  share that task's existing subfolder rather than each getting their own.
 
 ## Git & deployment workflow
 
