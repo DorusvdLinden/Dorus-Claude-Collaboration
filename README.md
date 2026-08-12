@@ -29,6 +29,12 @@ before adding it; if it can't be stated without naming a specific project's
 details, it probably belongs in that project's `CLAUDE.md` instead, not
 here.
 
+**Global default**: `CLAUDE.md` here is also copied to `~/.claude/CLAUDE.md`,
+where Claude Code applies it as the default for every session across every
+project, underneath whatever project-specific `CLAUDE.md` is present.
+After any change here, re-copy the file to that location to keep the two
+in sync.
+
 ## Origin
 
 Started while working on
