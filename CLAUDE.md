@@ -282,3 +282,12 @@ runs.
   an entry from it if it reveals a standing preference or fact that will
   matter next time - the rest is ephemeral task state, already served by
   the end-of-session debrief itself.
+
+## This repo's own maintenance
+
+Not a portable rule - specific to working in this repo, so skip it when
+copying sections elsewhere.
+
+- **After any change to this file, ask whether to also re-sync
+  `~/.claude/CLAUDE.md`** (see README.md's "Global default" section)
+  rather than doing it silently or letting the two drift apart.
