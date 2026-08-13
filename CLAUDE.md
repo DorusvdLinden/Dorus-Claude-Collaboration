@@ -47,6 +47,14 @@ update process.
   given run (a rare event, a specific data combination), add deterministic
   crafted fixtures for that specific case, while keeping real-pipeline
   checks as the default for everything else.
+- **For high-stakes changes, use a Writer/Reviewer split across two
+  sessions.** One session implements; a second, fresh session reviews the
+  diff with no memory of the reasoning that produced it, catching things a
+  same-session self-review misses. Reserve this for changes where being
+  wrong is costly (security, data migrations, anything hard to reverse) -
+  it's overhead most changes don't need. This stacks with, rather than
+  replaces, Mode 2/3's lighter subagent review for non-trivial changes
+  (below) - a high-stakes change gets both.
 
 ## Documentation as a living system
 
@@ -156,6 +164,12 @@ in the README - don't scaffold empty doc files upfront.
   beats guessing wrong and redoing work.
 - **Don't ask when there's a reasonable default.** Make the call, state it,
   and let the user redirect. Over-asking is its own cost.
+- **For a cheap, reversible experiment, try it and roll back if wrong,
+  rather than asking first.** Claude Code checkpoints file state on every
+  prompt (`/rewind` restores code/conversation), so a fork that's fully
+  undoable this way doesn't need to block on a question - reserve asking
+  for forks with a real cost to being wrong (something merged, deployed,
+  sent externally, or otherwise not cleanly undoable by rewinding alone).
 - **Be explicit about real risk before a disruptive action** on live
   infrastructure (a reachable device, a running service) - name what could
   go wrong, not just that you're proceeding. If repeated attempts at the
@@ -191,10 +205,18 @@ architecturally significant / ambiguous / hard-to-reverse work.
 - Break the problem into steps out loud before touching anything.
 - Surface real options with tradeoffs (2-3, not 10) instead of silently
   picking one.
-- No edits, no side-effecting commands, until the plan is explicitly
-  confirmed.
+- No implementation edits, no side-effecting commands, until the plan is
+  explicitly confirmed - writing planning artifacts themselves (an
+  interview's findings, `SPEC.md`, the plan file below) doesn't count
+  against this.
 - Ask clarifying questions freely - this is the mode where asking is
-  cheap.
+  cheap. For a bigger or ambiguous feature, consider a structured
+  interview (technical approach, UX, edge cases, tradeoffs - dig into
+  what wasn't considered, not just the obvious questions) and write the
+  result to `SPEC.md` before drafting the plan. For a long interview,
+  start a fresh session to implement from the spec (or at minimum clear
+  context - see Session & instruction hygiene) so the build phase isn't
+  cluttered by the back-and-forth that produced it.
 - Once the plan is confirmed, create a new feature branch before making
   any changes (name reflects the task, e.g. `feature/dark-mode-toggle`).
 - Commit and push to that branch as work proceeds, tested increment by
@@ -211,6 +233,10 @@ Trigger: everyday tasks by default, or "let's just build this."
 
 - Create/switch to a feature branch before the first edit, unless
   already on one suited to this task - never build directly on `main`.
+- Before diving into a moderately-sized task, a quick round of scoping
+  questions (not a full Mode 1 interview) can be worth it if
+  requirements are fuzzy - cheaper than guessing wrong and redoing work
+  mid-build.
 - Make reasonable, reversible changes without asking step-by-step
   permission.
 - Still ask on a genuine fork (architecture choice, ambiguous
@@ -219,6 +245,10 @@ Trigger: everyday tasks by default, or "let's just build this."
   `reset --hard`, deleting unmerged branches, etc.).
 - Narrate briefly at key moments - findings, direction changes,
   blockers - not a play-by-play.
+- For non-trivial changes (multi-file, or touching logic rather than a
+  one-line fix), have a fresh-context subagent review the diff before
+  calling it done - report only correctness gaps against the task, not
+  style preferences. Skip this for small, trivial changes.
 - Commit and push once a change is tested and working, per the Git &
   deployment workflow loop above - that section is itself the standing
   authorization, not something to ask about each time. Merging to
@@ -229,6 +259,11 @@ Trigger: everyday tasks by default, or "let's just build this."
 Trigger: "I'll be away," "go do X while I'm out," scheduled/overnight
 runs.
 
+- In the first few minutes before the user leaves, ask any clarifying
+  questions needed to scope the session (technical approach, priorities
+  among tasks, anything genuinely ambiguous) - but don't block on it: if
+  there's no response within 20 minutes, proceed using judgment and
+  reasonable defaults, per the norm below.
 - Start by creating a dedicated branch - everything for the session
   happens there; `main` stays untouched until reviewed.
 - Push as far as possible without stopping. Use judgment + memory +
@@ -240,12 +275,19 @@ runs.
   every other irreversible action below.
 - When a genuine fork has multiple good options - not one
   obviously-best path - don't silently pick one. Build each viable
-  option as its own branch (e.g. `away/dark-mode-css-vars` vs
-  `away/dark-mode-context-api`), so the choice on return is a
+  option as its own branch, each in its own git worktree (not just a
+  branch switch in one working copy, so versions don't collide on the
+  filesystem) - e.g. `away/dark-mode-css-vars` vs
+  `away/dark-mode-context-api` - so the choice on return is a
   comparison, not a guess. Keep the number of parallel versions small
   (2-3, matching the option-count guidance from Mode 1) and only do
   this for forks actually worth the extra build time - not every minor
   naming choice.
+- Verify each task the same way Mode 2 does (above) before treating it
+  as finished within the session; for longer unattended stretches,
+  prefer a deterministic gate - a Stop hook or a `/goal` condition -
+  over trusting "looks done," since nothing catches a false completion
+  if no one's watching.
 - Truly irreversible actions (force-push, merge to main, deleting
   anything, sending external messages) are never taken unilaterally -
   stay on the branch(es) and queue the go/no-go for the end.
@@ -282,6 +324,33 @@ runs.
   an entry from it if it reveals a standing preference or fact that will
   matter next time - the rest is ephemeral task state, already served by
   the end-of-session debrief itself.
+
+## Session & instruction hygiene
+
+- **Prune this file regularly.** For each line, ask: would removing it
+  cause mistakes? If not, cut it. A bloated file causes instructions to
+  get ignored - if Claude keeps doing something despite a rule against
+  it, the file is probably too long, not the rule too weak.
+- **Move situational knowledge out of this file.** Guidance that's only
+  relevant sometimes (a specific integration's quirks, a rarely-touched
+  subsystem) belongs in a Skill, loaded on demand, not in the
+  always-loaded `CLAUDE.md`.
+- **Use hooks for anything that must happen with zero exceptions.**
+  `CLAUDE.md` is advisory - Claude can misread or deprioritize it under
+  context pressure. A hook (lint after edit, block writes to a sensitive
+  path, a Stop-hook gate on a verification check) is deterministic and
+  can't be skipped the way a text instruction can.
+- **Clear context between unrelated tasks (`/clear`).** Don't let one
+  session accumulate a second, unrelated task's files and commands on
+  top of the first - it degrades performance on both.
+- **After correcting the same mistake twice without success, stop
+  patching.** Clear and restart with a better initial prompt that
+  incorporates what was learned, rather than continuing to layer
+  corrections onto an already-polluted context.
+- **Scope open-ended investigation to a subagent.** Exploring an
+  unfamiliar area in the main conversation fills its context with
+  everything read along the way; a subagent explores in its own context
+  and reports back only the summary.
 
 ## This repo's own maintenance
 
