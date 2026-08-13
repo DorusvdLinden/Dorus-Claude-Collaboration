@@ -10,36 +10,36 @@ out to matter regardless of what's being built.
 Claude Code reads automatically from a project root, so a section can be
 copied verbatim into a new project's own `CLAUDE.md` as a starting point.
 
-Eight sections:
+Nine sections:
 
 - **Verification & testing discipline** - verify facts before acting on
-  them, run regression/visual checks automatically, root-cause with
-  evidence, and know when live checks aren't enough (crafted fixtures) or
-  a two-session Writer/Reviewer split is worth the overhead (high-stakes
-  changes).
+  them, auto-run regression/visual checks, root-cause with evidence, use
+  crafted fixtures when live data can't reliably cover a case, and a
+  two-session Writer/Reviewer split for high-stakes changes.
 - **Documentation as a living system** - four minimal docs per project
-  (`README.md`/`TODO.md`/`IDEAS.md`/`CHANGES.md`), each with a defined
-  owner and job; update them in the same change that invalidates them.
-- **Artifact preservation** - never delete a generated render, screenshot,
-  or mockup once it's been shown; organize by task, not as a flat pile.
+  (`README.md`, `TODO.md`, `IDEAS.md`, `CHANGES.md`), each with a
+  distinct owner; update docs in the same change that invalidates them.
+- **Artifact preservation** - never delete a generated render/screenshot/
+  mockup once shown; organize by task in subfolders, not a flat pile.
 - **Git & deployment workflow** - branch before editing in every mode;
-  commit/push are standing-authorized once a change is tested, merging to
-  `main` always stays gated; watch for persistent-process deploys that
-  need an explicit restart, not just a `git pull`.
+  commit/push standing-authorized once tested; merging to `main` always
+  stays gated; watch for persistent processes needing an explicit
+  restart after deploy.
 - **Decision-making & communication** - ask on a genuine fork, don't ask
-  when there's a reasonable default, and prefer a cheap reversible
-  experiment (try it, `/rewind` if wrong) over asking when a checkpoint
-  makes it undoable anyway.
-- **Working modes** - three explicit modes (Plan / Build / Away) governing
-  how much autonomy to use before checking in, each with its own
-  branching, review, and verification rules.
-- **Memory & continuity** - what's worth persisting across sessions versus
-  what's ephemeral task state.
-- **Session & instruction hygiene** - keep this file itself lean (prune
-  regularly, move situational knowledge to Skills, enforce zero-exception
-  rules with hooks instead of advisory text) and manage context
-  deliberately (`/clear` between tasks, subagents for open-ended
+  when there's a reasonable default, and prefer trying a cheap reversible
+  experiment (then `/rewind` if wrong) over asking upfront.
+- **Working modes** - three explicit modes (Plan / Build / Away)
+  controlling how much autonomy to use before checking in, each with its
+  own branching, spec-interview, and review rules.
+- **Memory & continuity** - persist durable cross-session facts only;
+  treat session/decision logs as ephemeral unless they reveal a standing
+  preference.
+- **Session & instruction hygiene** - keep `CLAUDE.md` itself pruned,
+  push zero-exception rules into hooks rather than advisory text, and
+  manage context deliberately (`/clear`, subagents for open-ended
   exploration).
+- **This repo's own maintenance** - after any change here, ask whether to
+  re-sync the global `~/.claude/CLAUDE.md` copy.
 
 ## How to use this
 
