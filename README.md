@@ -6,12 +6,40 @@ out to matter regardless of what's being built.
 
 ## What's here
 
-[CLAUDE.md](./CLAUDE.md) - the actual rules, organized by theme (testing,
-documentation, artifact preservation, git/deployment, decision-making,
-working modes, memory, session/instruction hygiene). Written in the same
-format Claude Code reads automatically from a project root, so a section
-can be copied verbatim into a new project's own `CLAUDE.md` as a
-starting point.
+[CLAUDE.md](./CLAUDE.md) - the actual rules. Written in the same format
+Claude Code reads automatically from a project root, so a section can be
+copied verbatim into a new project's own `CLAUDE.md` as a starting point.
+
+Eight sections:
+
+- **Verification & testing discipline** - verify facts before acting on
+  them, run regression/visual checks automatically, root-cause with
+  evidence, and know when live checks aren't enough (crafted fixtures) or
+  a two-session Writer/Reviewer split is worth the overhead (high-stakes
+  changes).
+- **Documentation as a living system** - four minimal docs per project
+  (`README.md`/`TODO.md`/`IDEAS.md`/`CHANGES.md`), each with a defined
+  owner and job; update them in the same change that invalidates them.
+- **Artifact preservation** - never delete a generated render, screenshot,
+  or mockup once it's been shown; organize by task, not as a flat pile.
+- **Git & deployment workflow** - branch before editing in every mode;
+  commit/push are standing-authorized once a change is tested, merging to
+  `main` always stays gated; watch for persistent-process deploys that
+  need an explicit restart, not just a `git pull`.
+- **Decision-making & communication** - ask on a genuine fork, don't ask
+  when there's a reasonable default, and prefer a cheap reversible
+  experiment (try it, `/rewind` if wrong) over asking when a checkpoint
+  makes it undoable anyway.
+- **Working modes** - three explicit modes (Plan / Build / Away) governing
+  how much autonomy to use before checking in, each with its own
+  branching, review, and verification rules.
+- **Memory & continuity** - what's worth persisting across sessions versus
+  what's ephemeral task state.
+- **Session & instruction hygiene** - keep this file itself lean (prune
+  regularly, move situational knowledge to Skills, enforce zero-exception
+  rules with hooks instead of advisory text) and manage context
+  deliberately (`/clear` between tasks, subagents for open-ended
+  exploration).
 
 ## How to use this
 
