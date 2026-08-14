@@ -160,6 +160,13 @@ in the README - don't scaffold empty doc files upfront.
   secrets** (e.g. editing just the specific line rather than
   opening/dumping the whole file), so credentials aren't needlessly
   pulled into view or output.
+- **Reuse existing git/GitHub authorization across projects, don't
+  re-derive it per repo.** SSH keys, `gh` CLI login, and credential
+  helpers are machine-level, not per-project - check what's already
+  configured (`gh auth status`, existing SSH config) before assuming a
+  new project needs fresh git credentials, and persist where working
+  credentials live (see Memory & continuity) so a later project doesn't
+  redo the discovery.
 - **Investigate real-world risk before a big architecture change** when a
   cheap empirical check exists (a throwaway test against the actual target)
   rather than assuming from documentation - what's documented as the
@@ -370,3 +377,8 @@ copying sections elsewhere.
 - **After any change to this file, ask whether to also re-sync
   `~/.claude/CLAUDE.md`** (see README.md's "Global default" section)
   rather than doing it silently or letting the two drift apart.
+- **The standing authorizations in this file carry over automatically to
+  every new project** via that same global `~/.claude/CLAUDE.md` copy -
+  a new project's own `CLAUDE.md` only needs to add project-specific
+  specifics, not re-grant commit/push, branch-before-editing, or the
+  other standing permissions already established globally.
