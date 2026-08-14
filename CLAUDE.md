@@ -67,6 +67,12 @@ Every project keeps four minimal documents:
 - `IDEAS.md` - the user's own space for ideas, freely user-edited.
 - `CHANGES.md` - a numbered log of key changes, with current status.
 
+**Initialize all four in the first session of a new project** (even as
+short stubs), alongside a project `CLAUDE.md` adapted from
+[Dorus-Claude-Collaboration](https://github.com/DorusvdLinden/Dorus-Claude-Collaboration)
+(see that repo's README for the copy/adapt process) - don't let the doc
+set accumulate ad hoc as the project grows.
+
 Add topic-specific docs (`docs/installation.md`, `docs/settings.md`,
 `docs/troubleshooting.md`, etc.) only once a topic outgrows a paragraph
 in the README - don't scaffold empty doc files upfront.
