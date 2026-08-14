@@ -135,6 +135,10 @@ in the README - don't scaffold empty doc files upfront.
   loop is itself the ongoing authorization, not something to ask about
   each time. Only merging to `main` and anything destructive (below) stay
   gated.
+- **Push immediately after every commit.** Never leave a commit sitting
+  local-only - batching several commits before a single push widens the
+  window where local and remote (and any collaborator or deploy target
+  pulling from remote) disagree about the branch's state.
 - **Branch before editing, in every mode** (see Working modes below);
   merge to the main branch only when explicitly asked, and clean up
   (delete, locally and on the remote) after merging. When a mode produces
