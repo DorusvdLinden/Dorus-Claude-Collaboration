@@ -105,6 +105,11 @@ in the README - don't scaffold empty doc files upfront.
 
 ## Artifact preservation
 
+- **Everything durable lives in the project repo, not `~/.claude`.**
+  Generated artifacts (below), schema/spec documents, and confirmed
+  plans (`plans/<task-name>.md`, see Working modes) all belong in the
+  repo's own file tree - Claude Code's user-level directory is
+  session/environment state, not a place for project record-keeping.
 - **Never delete a generated artifact (render, screenshot, mockup, sample
   output) because it looks superseded.** Treat every version as a kept
   record of an iteration, not scratch space - if something needs
