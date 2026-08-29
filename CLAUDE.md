@@ -177,6 +177,9 @@ in the README - don't scaffold empty doc files upfront.
   rather than assuming from documentation - what's documented as the
   standard approach doesn't always work on the actual hardware/environment
   in front of you.
+- **Whenever a new project gets Docker-hosted on Dorus's NAS, add it to
+  `nas-dashboard` (http://192.168.1.2:8093/) as part of that deploy step**,
+  so the dashboard stays a complete index of what's actually running there.
 
 ## Decision-making & communication
 
