@@ -368,6 +368,20 @@ runs.
 - **Clear context between unrelated tasks (`/clear`).** Don't let one
   session accumulate a second, unrelated task's files and commands on
   top of the first - it degrades performance on both.
+- **Process bulk photos/images in small batches, compacting or clearing
+  between batches.** Any task that reads many images in a row (cropping,
+  verifying, comparing screenshots, reviewing mockups) should work
+  through them ~5 at a time, then `/compact` (or `/clear` if that's not
+  enough) before starting the next batch, rather than letting images
+  from every batch pile up in one growing context. This applies
+  regardless of what the images are for - reading a full-resolution
+  image into an already-large context costs far more than reading the
+  same image into a small one, because prompt caching has to rewrite the
+  entire accumulated context on the next turn, not just add the new
+  image. A single overnight session that skipped this (processing ~90
+  photos with no batching or compaction) burned the bulk of its token
+  cost in just two multi-minute bursts near the end, once the
+  accumulated context had grown large.
 - **After correcting the same mistake twice without success, stop
   patching.** Clear and restart with a better initial prompt that
   incorporates what was learned, rather than continuing to layer
