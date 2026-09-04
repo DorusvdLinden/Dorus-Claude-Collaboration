@@ -1,0 +1,54 @@
+services:
+  # --- Tailscale sidecar -----------------------------------------------
+  # Puts the devbox on your private tailnet instead of exposing it to the
+  # LAN or internet. Remove this whole service (and the network_mode line
+  # below) if you'd rather use your NAS's own reverse proxy / VPN.
+  tailscale:
+    image: tailscale/tailscale:latest
+    hostname: nas-devbox
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_EXTRA_ARGS=--accept-dns=false
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+
+  # --- Dev environment: code-server + Claude Code ------------------------
+  devbox:
+    build:
+      context: .
+      args:
+        CODER_UID: ${CODER_UID:-1000}
+        CODER_GID: ${CODER_GID:-1000}
+    container_name: nas-claude-devbox
+    network_mode: "service:tailscale"   # only reachable via the tailnet
+    depends_on:
+      - tailscale
+    environment:
+      - CODE_SERVER_PASSWORD=${CODE_SERVER_PASSWORD}
+      # Optional: set this to skip interactive `claude login` in the terminal.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      # Your actual project files, kept on NAS storage.
+      - ${PROJECTS_PATH:-./projects}:/home/coder/project
+      # Claude Code auth/config — survives container rebuilds.
+      - claude-config:/home/coder/.claude
+      # code-server settings & installed extensions — same reason.
+      - code-server-config:/home/coder/.local/share/code-server
+    restart: unless-stopped
+    mem_limit: 4g
+    # No `cpus:` limit here -- several Synology DSM kernels don't expose
+    # the CPU CFS scheduler cgroup Docker needs for it, and `docker compose
+    # up` fails outright ("NanoCPUs can not be set...") rather than just
+    # ignoring the setting. Found deploying to the target NAS. mem_limit
+    # uses the memory cgroup instead, which isn't affected.
+
+volumes:
+  tailscale-state:
+  claude-config:
+  code-server-config:
