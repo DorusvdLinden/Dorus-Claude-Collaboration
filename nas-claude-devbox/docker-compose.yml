@@ -42,7 +42,11 @@ services:
       - code-server-config:/home/coder/.local/share/code-server
     restart: unless-stopped
     mem_limit: 4g
-    cpus: 2.0
+    # No `cpus:` limit here -- several Synology DSM kernels don't expose
+    # the CPU CFS scheduler cgroup Docker needs for it, and `docker compose
+    # up` fails outright ("NanoCPUs can not be set...") rather than just
+    # ignoring the setting. Found deploying to the target NAS. mem_limit
+    # uses the memory cgroup instead, which isn't affected.
 
 volumes:
   tailscale-state:
