@@ -4,8 +4,14 @@ ARG CODER_UID=1000
 ARG CODER_GID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    HOME=/home/coder \
     PATH="/home/coder/.local/bin:${PATH}"
+# HOME is intentionally NOT set here: setting it globally would apply to
+# every RUN step regardless of which USER is active, including the
+# code-server install below which still runs as root. Docker sets HOME
+# correctly per-user automatically once `USER coder` is in effect,
+# resolving it from /etc/passwd -- an explicit global override here
+# previously caused root's installer to write into what should be
+# coder-only home directory contents, poisoning their ownership.
 
 # --- Base packages -----------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
