@@ -23,7 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # --- Non-root user -------------------------------------------------------
 # code-server and Claude Code both expect to run as a normal user, not root.
-RUN groupadd -g ${CODER_GID} coder \
+# GID 100 is Ubuntu's own reserved "users" group -- and also the default
+# GID of Synology's "users" group, so CODER_GID often collides with it.
+# Reuse the existing group by GID instead of failing when that happens.
+RUN (getent group ${CODER_GID} >/dev/null || groupadd -g ${CODER_GID} coder) \
     && useradd -m -u ${CODER_UID} -g ${CODER_GID} -s /bin/bash coder \
     && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
