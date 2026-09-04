@@ -48,7 +48,10 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 COPY --chown=coder:coder entrypoint.sh /home/coder/entrypoint.sh
 USER root
 RUN chmod +x /home/coder/entrypoint.sh
-USER coder
+# Stays root here (not USER coder): Docker creates named volumes root-owned
+# on first use, and code-server-config/claude-config are both named
+# volumes -- entrypoint.sh needs root once at container start to fix their
+# ownership before it drops to coder for everything else.
 
 EXPOSE 8080
 

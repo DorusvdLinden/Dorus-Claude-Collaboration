@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "${1:-}" != "--as-coder" ]; then
+    # Starts as root (see Dockerfile). Docker creates named volumes
+    # (code-server-config, claude-config) owned by root:root the first
+    # time they're used, and code-server/Claude Code both need to write
+    # into them -- fix that once here, then drop to the coder user that
+    # everything below actually expects to run as.
+    chown -R coder:coder /home/coder/.local/share/code-server /home/coder/.claude
+    exec su coder -c "HOME=/home/coder exec $0 --as-coder"
+fi
+
+# --- Everything below runs as coder, with HOME correctly set. ---
+
 # code-server reads its password from this env var if set (see docker-compose.yml).
 export PASSWORD="${CODE_SERVER_PASSWORD:-}"
 
