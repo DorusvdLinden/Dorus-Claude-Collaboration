@@ -6,8 +6,11 @@ if [ "${1:-}" != "--as-coder" ]; then
     # (code-server-config, claude-config) owned by root:root the first
     # time they're used, and code-server/Claude Code both need to write
     # into them -- fix that once here, then drop to the coder user that
-    # everything below actually expects to run as.
-    chown -R coder:coder /home/coder/.local/share/code-server /home/coder/.claude
+    # everything below actually expects to run as. Owner only, no group:
+    # when CODER_GID collides with a group Ubuntu already reserves (see
+    # Dockerfile), coder's group is that existing group, not literally
+    # named "coder" -- chown here only needs the owner to match anyway.
+    chown -R coder /home/coder/.local/share/code-server /home/coder/.claude
     exec su coder -c "HOME=/home/coder exec $0 --as-coder"
 fi
 
