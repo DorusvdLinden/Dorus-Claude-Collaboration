@@ -13,9 +13,10 @@ copied verbatim into a new project's own `CLAUDE.md` as a starting point.
 Nine sections:
 
 - **Verification & testing discipline** - verify facts before acting on
-  them, auto-run regression/visual checks, root-cause with evidence, use
-  crafted fixtures when live data can't reliably cover a case, and a
-  two-session Writer/Reviewer split for high-stakes changes.
+  them, auto-run regression/visual checks, root-cause with evidence (check
+  a stale process's own output, not a fresh debug session), use crafted
+  fixtures when live data can't reliably cover a case, and a two-session
+  Writer/Reviewer split for high-stakes changes.
 - **Documentation as a living system** - four minimal docs per project
   (`README.md`, `TODO.md`, `IDEAS.md`, `CHANGES.md`), each with a
   distinct owner; update docs in the same change that invalidates them.
@@ -24,7 +25,9 @@ Nine sections:
 - **Git & deployment workflow** - branch before editing in every mode;
   commit/push standing-authorized once tested; merging to `main` always
   stays gated; watch for persistent processes needing an explicit
-  restart after deploy.
+  restart after deploy; container entrypoints that drop root privileges
+  have recurring gotchas (PATH loss on `su`, first-mount volume
+  ownership, GID collisions, state hiding outside the mounted volume).
 - **Decision-making & communication** - ask on a genuine fork, don't ask
   when there's a reasonable default, and prefer trying a cheap reversible
   experiment (then `/rewind` if wrong) over asking upfront.

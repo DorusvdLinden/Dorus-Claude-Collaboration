@@ -37,7 +37,12 @@ update process.
   evidence actually showed, not just the conclusion reached. For a
   rejected credential specifically, check its literal content (length,
   stray whitespace) before escalating - copy/paste truncation is a
-  common, easy-to-rule-out cause.
+  common, easy-to-rule-out cause. For a supervised/long-running process,
+  check its own original output, not a fresh debug shell/session attached
+  to the same environment - a new session can pick up corrected state
+  (env vars, working directory) that the stale original process never
+  got, making a live bug look intermittent or already fixed when it
+  isn't.
 - **Prefer an empirical check over an assumption when the cost is low.** If
   a risk can be tested directly and cheaply (e.g., a throwaway change on the
   real target, reverted after), do that instead of reasoning it out from
@@ -180,6 +185,31 @@ in the README - don't scaffold empty doc files upfront.
 - **Whenever a new project gets Docker-hosted on Dorus's NAS, add it to
   `nas-dashboard` (http://192.168.1.2:8093/) as part of that deploy step**,
   so the dashboard stays a complete index of what's actually running there.
+- **Container entrypoints that drop root privileges have sharp,
+  repeatable edges** - worth checking for on every new Docker deploy, not
+  just the one that first surfaced them:
+  - `su`/privilege-drop resets `PATH` to a bare system default, silently
+    breaking resolution of anything installed to a user-local path (e.g.
+    `~/.local/bin`) - a supervised loop just sees "command not found" on
+    every attempt, with no error at the call site. Set `PATH` (and `HOME`)
+    explicitly in the `su` invocation rather than assuming it carries over.
+  - Docker named volumes are created `root:root` on first mount even when
+    the container's default user is non-root - start the entrypoint as
+    root, `chown` the mount points once, then drop privileges, rather than
+    running as the non-root user from the start and hitting an opaque
+    `EACCES` the first time only.
+  - A container user's GID can collide with a group the base image already
+    reserves (e.g. `100`/`users`) - the OS silently reuses that existing
+    group instead of creating one named after your user, so a
+    `chown user:user` that assumes the names match fails with "invalid
+    group." Scope `chown` to the owner alone when only user-level write
+    access is actually needed.
+  - Don't assume a volume/bind-mount covers "all persistent state" for a
+    tool without checking where it actually writes - first-run/onboarding
+    flags can land outside the directory you assumed was the persistence
+    boundary. For an unattended/headless process this is worse than
+    cosmetic: a missed one-time prompt hangs the process forever with
+    nobody there to answer it.
 
 ## Decision-making & communication
 
