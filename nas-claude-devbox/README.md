@@ -99,6 +99,12 @@ http://<nas-devbox-tailscale-ip>:8080
 Enter the `CODE_SERVER_PASSWORD` you set. You now have full VS Code in the
 browser, rooted at `/home/coder/project` (your NAS `PROJECTS_PATH`).
 
+> **This deployment:** `http://100.93.245.82:8080` — password is in `.env`
+> on the NAS (`/volume1/docker/nas-claude-devbox/.env`), not written here
+> since this file is version-controlled. The tailnet IP is stable but can
+> be re-checked with `tailscale ip -4` inside the `tailscale` container if
+> it ever changes.
+
 **Optional — HTTPS instead of a raw IP:port:** run `tailscale serve https / http://localhost:8080`
 inside the `tailscale` container for a proper HTTPS URL on your tailnet.
 
