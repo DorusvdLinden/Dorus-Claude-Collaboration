@@ -104,64 +104,75 @@ inside the `tailscale` container for a proper HTTPS URL on your tailnet.
 
 ---
 
-## 6. First-time Claude Code login
+## 6. First-time Claude Code login (one-time manual step)
 
-Open a terminal inside code-server (`` Terminal > New Terminal ``) and run:
+The entrypoint auto-starts a Remote Control server in a detached `tmux`
+session, but the very first run still needs one manual, interactive step:
+logging in and accepting the workspace-trust prompt. Both are interactive
+by design and can't be scripted around.
+
+**Important:** Remote Control (the mobile app's Code tab, section 7) does
+**not** support `ANTHROPIC_API_KEY` auth — only an interactive Pro/Max
+login works with it. If you want to use the mobile app, leave
+`ANTHROPIC_API_KEY` blank in `.env` and log in interactively as below.
+
+**Don't attach to the `claude` tmux session for this** — it's running a
+restart loop (`while true; do claude remote-control ...; sleep 5; done`),
+and Ctrl-C there kills the whole loop's shell, not just one attempt (tmux
+delivers Ctrl-C to the entire pane's process group). Since you're not
+logged in yet, `claude remote-control` just exits immediately with an
+error and the loop harmlessly retries every 5 seconds in the background —
+leave it alone.
+
+Instead, open a **separate** terminal inside code-server (`` Terminal >
+New Terminal ``, not the tmux pane) and log in there:
 
 ```bash
-claude
+cd /home/coder/project
+claude          # follow the printed URL to log in with your Pro/Max account
 ```
 
-- If `ANTHROPIC_API_KEY` was set in `.env`, it authenticates automatically.
-- Otherwise, follow the printed login URL to authenticate with your Pro/Max
-  account. Credentials are written to `~/.claude`, which is a persistent
-  Docker volume — you won't need to log in again after a container restart.
+Accept the workspace-trust prompt when it appears, confirm you're logged
+in, then exit (Ctrl-D or `/exit`). Credentials are written to `~/.claude`,
+a persistent Docker volume. Within a few seconds the restart loop's next
+retry picks up the new login automatically and starts serving Remote
+Control for real — you won't need to log in again after a container
+restart.
 
 ---
 
 ## 7. Connect the Claude mobile app (Remote Control)
 
 This is what lets you pick up the same running Claude Code session from
-your phone, not just from the browser IDE.
+your phone, not just from the browser IDE — and, per the goal this is
+built for, start new small projects from your phone with no browser IDE
+open at all.
 
-1. In the terminal session where `claude` is running, enable it for this
-   session or for all future ones:
+1. On your phone: open the **Claude app → Code tab**. The session appears
+   as **"NAS Devbox"** with a computer icon and a green dot once it's
+   online (a minute or so after the container starts, once you've
+   completed the one-time login in section 6).
+2. Tap it to open a chat window into that session. Ask it to scaffold a
+   new project, write code, run commands — it executes entirely on the
+   NAS container, with full access to your mounted project files,
+   `~/.claude` config, and any MCP servers.
+3. If `/home/coder/project` (your `PROJECTS_PATH`) is a git repository,
+   the entrypoint runs Remote Control in `--spawn worktree` mode: **every
+   new session you start from the phone gets its own isolated git
+   worktree**, so starting a second small project doesn't collide with
+   whatever the first one is doing. If it isn't a git repo yet, it falls
+   back to sharing one directory across sessions. Worktree-mode detection
+   only runs once at container start, so if you `git init` in
+   `PROJECTS_PATH` to switch modes, restart the container afterwards
+   (`docker compose restart devbox`) for it to take effect.
 
-   ```
-   /config
-   ```
-
-   Toggle **"Enable Remote Control for all sessions"** to `true` (or use
-   the one-off convert-this-session command if you'd rather opt in per
-   session).
-
-2. Claude Code prints a session URL and can show a QR code (press
-   spacebar).
-
-3. On your phone: open the **Claude app → Code tab**, find the session
-   (it shows a computer icon with a green dot when online), or scan the QR
-   code the first time.
-
-4. Chat with it from your phone. Execution still happens entirely on the
-   NAS container — your mounted project files, `~/.claude` config, and any
-   MCP servers stay right where they are. The phone is just a window into
-   that session.
-
-**Keeping the session alive:** the entrypoint script pre-creates a detached
-`tmux` session named `claude`. Run `claude` inside it so a dropped browser
-tab or SSH connection doesn't kill the process:
-
-```bash
-tmux attach -t claude
-claude
-# ... work, then detach without stopping it:
-# Ctrl-b, then d
-```
-
-Note this survives *disconnects*, not a container restart — if the
-`devbox` container restarts, you'll need to re-attach and run `claude`
-again (conversation history is preserved as long as you're in the same
-project directory, since `~/.claude` is a persistent volume).
+**Keeping the session alive:** the entrypoint's `tmux` session named
+`claude` runs `claude remote-control` in a restart loop, so it survives a
+dropped browser tab, a disconnected phone, or the container itself
+restarting — no manual re-attach needed after the one-time login in
+section 6. To check on it directly, `tmux attach -t claude` any time (this
+does not interrupt the running Remote Control server; just detach again
+with `Ctrl-b` then `d`).
 
 ---
 
@@ -178,6 +189,11 @@ project directory, since `~/.claude` is a persistent volume).
 
 ## 9. Maintenance
 
+- **Troubleshooting Remote Control connectivity:** the restart loop's
+  output (login errors, crash-loop failures) only appears inside the
+  `claude` tmux pane, not in `docker compose logs`. From the NAS host:
+  `docker exec -it nas-claude-devbox tmux attach -t claude` (detach with
+  `Ctrl-b` then `d` — don't Ctrl-C, see section 6).
 - **Updating Claude Code:** `claude update` inside the container (or it
   updates itself in the background, depending on install channel).
 - **Updating code-server:** rebuild the image —

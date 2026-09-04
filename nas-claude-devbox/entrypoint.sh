@@ -4,18 +4,39 @@ set -euo pipefail
 # code-server reads its password from this env var if set (see docker-compose.yml).
 export PASSWORD="${CODE_SERVER_PASSWORD:-}"
 
-# If an API key was supplied via the environment, Claude Code will pick it up
-# automatically — no need to run `claude login` interactively in that case.
+# Remote Control (the Claude mobile app's Code tab) does NOT support API-key
+# auth -- only an interactive Pro/Max login (`claude login`) works with it.
+# An API key still works for a plain `claude` session, just not Remote Control.
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-    echo "ANTHROPIC_API_KEY detected: Claude Code will authenticate automatically."
+    echo "ANTHROPIC_API_KEY detected: plain 'claude' sessions will authenticate"
+    echo "automatically, but Remote Control (mobile app) will NOT work with an"
+    echo "API key -- it requires an interactive Pro/Max login. See README."
 fi
 
-# Pre-create a detached tmux session named "claude" so that:
-#   1. Starting `claude` inside it lets you attach/detach without killing the process.
-#   2. It survives the code-server browser tab or SSH connection dropping.
-# It does NOT survive a container restart — see README for making this durable.
+# --spawn worktree gives every session started from the mobile app its own
+# git worktree, so starting a new small project from your phone doesn't
+# collide with whatever else is open. Falls back to same-dir if the project
+# folder isn't a git repo yet (worktree mode requires one).
+if [ -d /home/coder/project/.git ]; then
+    SPAWN_MODE=worktree
+else
+    SPAWN_MODE=same-dir
+    echo "NOTE: /home/coder/project is not a git repo -- Remote Control will run"
+    echo "in same-dir mode. Run 'git init' there to get isolated per-session"
+    echo "worktrees for each project you start from your phone."
+fi
+
+# Keep a Remote Control server running in a detached tmux session so the
+# mobile app's Code tab can always reach it. This loop restarts it
+# automatically whenever the container restarts. Until you've logged in,
+# each attempt fails fast and the loop just retries every 5s -- log in
+# via a SEPARATE terminal (see README section 6), not by attaching here;
+# Ctrl-C in this pane kills the whole loop's shell, not one attempt.
+# Login and workspace trust persist on the ~/.claude and project volumes,
+# so this is only needed once, ever.
 if ! tmux has-session -t claude 2>/dev/null; then
-    tmux new-session -d -s claude -c "/home/coder/project" || true
+    tmux new-session -d -s claude -c "/home/coder/project" \
+        "while true; do claude remote-control --spawn ${SPAWN_MODE} --name 'NAS Devbox'; sleep 5; done"
 fi
 
 echo "Starting code-server on :8080 ..."
