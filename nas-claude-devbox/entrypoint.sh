@@ -22,6 +22,24 @@ fi
 
 # --- Everything below runs as coder, with HOME correctly set. ---
 
+# Claude Code keeps account-level state (including whether the one-time
+# "Enable Remote Control?" prompt has already been answered) in
+# ~/.claude.json -- a single file OUTSIDE the ~/.claude directory, so it
+# is NOT covered by the claude-config volume and would be silently wiped
+# on every container rebuild/recreate. Without this, the y/n prompt would
+# reappear with nobody attached to answer it, hanging the loop below
+# forever. Redirect it into the persisted volume via a symlink, moving
+# over whatever's already there the first time this runs.
+CONFIG_JSON=/home/coder/.claude.json
+CONFIG_JSON_PERSISTED=/home/coder/.claude/.claude.json
+if [ ! -L "$CONFIG_JSON" ]; then
+    if [ -f "$CONFIG_JSON" ] && [ ! -f "$CONFIG_JSON_PERSISTED" ]; then
+        mv "$CONFIG_JSON" "$CONFIG_JSON_PERSISTED"
+    fi
+    rm -f "$CONFIG_JSON"
+    ln -s "$CONFIG_JSON_PERSISTED" "$CONFIG_JSON"
+fi
+
 # code-server reads its password from this env var if set (see docker-compose.yml).
 export PASSWORD="${CODE_SERVER_PASSWORD:-}"
 
