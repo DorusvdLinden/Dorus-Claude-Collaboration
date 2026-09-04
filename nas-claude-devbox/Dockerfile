@@ -1,0 +1,46 @@
+FROM ubuntu:24.04
+
+ARG CODER_UID=1000
+ARG CODER_GID=1000
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    HOME=/home/coder \
+    PATH="/home/coder/.local/bin:${PATH}"
+
+# --- Base packages -----------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+        git \
+        sudo \
+        tmux \
+        ca-certificates \
+        unzip \
+        build-essential \
+        openssh-client \
+        locales \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen en_US.UTF-8
+
+# --- Non-root user -------------------------------------------------------
+# code-server and Claude Code both expect to run as a normal user, not root.
+RUN groupadd -g ${CODER_GID} coder \
+    && useradd -m -u ${CODER_UID} -g ${CODER_GID} -s /bin/bash coder \
+    && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# --- code-server (VS Code in the browser) --------------------------------
+RUN curl -fsSL https://code-server.dev/install.sh | sh
+
+# --- Claude Code (native installer, no Node.js dependency) ---------------
+USER coder
+WORKDIR /home/coder
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# --- Entrypoint ------------------------------------------------------------
+COPY --chown=coder:coder entrypoint.sh /home/coder/entrypoint.sh
+USER root
+RUN chmod +x /home/coder/entrypoint.sh
+USER coder
+
+EXPOSE 8080
+
+ENTRYPOINT ["/home/coder/entrypoint.sh"]
