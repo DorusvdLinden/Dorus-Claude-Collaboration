@@ -11,7 +11,13 @@ if [ "${1:-}" != "--as-coder" ]; then
     # Dockerfile), coder's group is that existing group, not literally
     # named "coder" -- chown here only needs the owner to match anyway.
     chown -R coder /home/coder/.local/share/code-server /home/coder/.claude
-    exec su coder -c "HOME=/home/coder exec $0 --as-coder"
+    # `su` resets PATH to a bare system default, dropping the
+    # ~/.local/bin entry Claude Code's native installer needs -- set it
+    # explicitly rather than relying on `su` to preserve the caller's.
+    # (Confirmed the hard way: it silently made the tmux loop below spin
+    # on "claude: command not found" forever, with no login ever
+    # succeeding -- see CHANGES.md.)
+    exec su coder -c "HOME=/home/coder PATH=/home/coder/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin exec $0 --as-coder"
 fi
 
 # --- Everything below runs as coder, with HOME correctly set. ---
