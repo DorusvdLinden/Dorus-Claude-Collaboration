@@ -149,12 +149,15 @@ in the README - don't scaffold empty doc files upfront.
   local-only - batching several commits before a single push widens the
   window where local and remote (and any collaborator or deploy target
   pulling from remote) disagree about the branch's state.
-- **Branch before editing, in every mode** (see Working modes below);
-  merge to the main branch only when explicitly asked, and clean up
-  (delete, locally and on the remote) after merging. When a mode produces
-  multiple candidate branches for the same fork, the same
-  not-fully-merged rule applies to the ones not picked - confirm before
-  deleting them rather than cleaning up unilaterally.
+- **Branch before editing, in every mode** (see Working modes below) -
+  a global hook blocks `Edit`/`Write`/`NotebookEdit` and `git commit` on
+  `main`/`master`, so this can no longer be skipped by mistake.
+- **Merge to the main branch only when explicitly asked**, and clean up
+  (delete, locally and on the remote) after merging - neither is
+  hook-enforced. When a mode produces multiple candidate branches for
+  the same fork, the same not-fully-merged rule applies to the ones not
+  picked - confirm before deleting them rather than cleaning up
+  unilaterally.
 - **Never take a destructive or hard-to-reverse action** (force-push,
   `reset --hard`, discarding uncommitted work, deleting a branch that isn't
   fully merged) without confirming first, scoped to exactly what's being
@@ -287,7 +290,9 @@ architecturally significant / ambiguous / hard-to-reverse work.
 Trigger: everyday tasks by default, or "let's just build this."
 
 - Create/switch to a feature branch before the first edit, unless
-  already on one suited to this task - never build directly on `main`.
+  already on one suited to this task (a hook blocks edits on `main`
+  regardless, so this is about avoiding the interruption, not the rule
+  itself).
 - Before diving into a moderately-sized task, a quick round of scoping
   questions (not a full Mode 1 interview) can be worth it if
   requirements are fuzzy - cheaper than guessing wrong and redoing work
