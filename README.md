@@ -67,6 +67,27 @@ project, underneath whatever project-specific `CLAUDE.md` is present.
 After any change here, re-copy the file to that location to keep the two
 in sync.
 
+**Global hooks**: [hooks/](./hooks/) holds reference copies of the hooks
+deployed to `~/.claude/hooks/` and wired up in `~/.claude/settings.json`,
+enforcing CLAUDE.md rules that can't be trusted to advisory text alone
+(see "Session & instruction hygiene" - zero-exception rules belong in
+hooks, not prose):
+
+- `block-main-mutations.js` - blocks `Edit`/`Write`/`NotebookEdit` and
+  `git commit` while the current branch is `main`/`master`, enforcing
+  "branch before editing" in every mode. Exempts Mode 1 planning
+  artifacts (`SPEC.md`, `plans/<task-name>.md`), which CLAUDE.md
+  explicitly allows to be written before a branch exists.
+- `stage-ideas-md.js` - before every `git commit`, auto-stages `IDEAS.md`
+  if it has pending changes, so manual edits made outside a Claude
+  session (`IDEAS.md` is the user's own space) always make it into the
+  next commit without being asked.
+
+`~/.claude` isn't a git repo, so these can't be symlinked in and tracked
+live - this is a manually-synced reference copy, the same pattern as the
+`CLAUDE.md` copy above. After changing a hook, copy the file to (or from)
+`~/.claude/hooks/` to keep the two in sync.
+
 ## Origin
 
 Started while working on
