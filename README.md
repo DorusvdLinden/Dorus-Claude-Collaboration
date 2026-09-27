@@ -75,9 +75,14 @@ hooks, not prose):
 
 - `block-main-mutations.js` - blocks `Edit`/`Write`/`NotebookEdit` and
   `git commit` while the current branch is `main`/`master`, enforcing
-  "branch before editing" in every mode. Exempts Mode 1 planning
-  artifacts (`SPEC.md`, `plans/<task-name>.md`), which CLAUDE.md
-  explicitly allows to be written before a branch exists.
+  "branch before editing" in every mode. For file edits it checks the
+  branch of the repo that contains the target file, not the session's
+  working directory. A file outside any repo (such as Claude Code's
+  memory folder under `~/.claude/projects/`) is never blocked, and a
+  file in a second repo is judged by that repo's branch. `git commit`
+  is still judged by the session's working directory. Exempts Mode 1
+  planning artifacts (`SPEC.md`, `plans/<task-name>.md`), which
+  CLAUDE.md explicitly allows to be written before a branch exists.
 - `stage-ideas-md.js` - before every `git commit`, auto-stages `IDEAS.md`
   if it has pending changes, so manual edits made outside a Claude
   session (`IDEAS.md` is the user's own space) always make it into the
