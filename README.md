@@ -6,43 +6,30 @@ out to matter regardless of what's being built.
 
 ## What's here
 
-[CLAUDE.md](./CLAUDE.md) - the actual rules. Written in the same format
-Claude Code reads automatically from a project root, so a section can be
-copied verbatim into a new project's own `CLAUDE.md` as a starting point.
+[CLAUDE.md](./CLAUDE.md) - the rules most tasks need, kept short (~75
+lines) because it is loaded into every session: verify, project docs,
+artifacts, git, decisions, working modes (summary), memory and context.
+Each section points to a guide for the detail.
 
-Nine sections:
+[guides/](./guides/) - the situational detail, read on demand when its
+trigger applies (not loaded automatically):
 
-- **Verification & testing discipline** - verify facts before acting on
-  them, auto-run regression/visual checks, root-cause with evidence (check
-  a stale process's own output, not a fresh debug session), use crafted
-  fixtures when live data can't reliably cover a case, and a two-session
-  Writer/Reviewer split for high-stakes changes.
-- **Documentation as a living system** - four minimal docs per project
-  (`README.md`, `TODO.md`, `IDEAS.md`, `CHANGES.md`), each with a
-  distinct owner; update docs in the same change that invalidates them.
-- **Artifact preservation** - never delete a generated render/screenshot/
-  mockup once shown; organize by task in subfolders, not a flat pile.
-- **Git & deployment workflow** - branch before editing in every mode;
-  commit/push standing-authorized once tested; merging to `main` always
-  stays gated; watch for persistent processes needing an explicit
-  restart after deploy; container entrypoints that drop root privileges
-  have recurring gotchas (PATH loss on `su`, first-mount volume
-  ownership, GID collisions, state hiding outside the mounted volume).
-- **Decision-making & communication** - ask on a genuine fork, don't ask
-  when there's a reasonable default, and prefer trying a cheap reversible
-  experiment (then `/rewind` if wrong) over asking upfront.
-- **Working modes** - three explicit modes (Plan / Build / Away)
-  controlling how much autonomy to use before checking in, each with its
-  own branching, spec-interview, and review rules.
-- **Memory & continuity** - persist durable cross-session facts only;
-  treat session/decision logs as ephemeral unless they reveal a standing
-  preference.
-- **Session & instruction hygiene** - keep `CLAUDE.md` itself pruned,
-  push zero-exception rules into hooks rather than advisory text, and
-  manage context deliberately (`/clear`, subagents for open-ended
-  exploration).
-- **This repo's own maintenance** - after any change here, ask whether to
-  re-sync the global `~/.claude/CLAUDE.md` copy.
+- [working-modes.md](./guides/working-modes.md) - full Plan / Build /
+  Away rules, mode-fit defaults; read when entering Mode 1 or 3.
+- [deployment.md](./guides/deployment.md) - "a push isn't a deploy" for
+  long-running processes, scoped edits on files holding secrets, NAS
+  dashboard, container privilege-drop gotchas (PATH loss on `su`,
+  first-mount volume ownership, GID collisions, state outside the volume).
+- [verification.md](./guides/verification.md) - evidence-based
+  root-causing (credentials, stale processes), crafted fixtures,
+  Writer/Reviewer split, full artifact-preservation rules.
+- [session-hygiene.md](./guides/session-hygiene.md) - pruning
+  `CLAUDE.md`, hooks for zero-exception rules, `/clear`, image batching,
+  memory scope, full project-doc rules.
+
+The split (2026-11-11) moved text verbatim; the pre-split single file is in
+git history. Don't put the guides in `~/.claude/rules/` - Claude Code loads
+that folder automatically, which would undo the saving.
 
 ## How to use this
 
@@ -63,21 +50,26 @@ here.
 
 **Global default**: `CLAUDE.md` here is also copied to `~/.claude/CLAUDE.md`,
 where Claude Code applies it as the default for every session across every
-project, underneath whatever project-specific `CLAUDE.md` is present.
-After any change here, re-copy the file to that location to keep the two
-in sync.
+project, underneath whatever project-specific `CLAUDE.md` is present, and
+`guides/` is copied to `~/.claude/guides/` (the global file links there).
+After any change here, re-copy both to keep them in sync - when Claude
+changes either side, it asks whether to re-sync the other rather than
+doing it silently. The standing authorizations in `CLAUDE.md` (commit/push,
+branch-before-editing) carry over to every project through that global
+copy, so a project's own `CLAUDE.md` only adds project specifics.
 
 **Global hooks**: [hooks/](./hooks/) holds reference copies of the hooks
 deployed to `~/.claude/hooks/` and wired up in `~/.claude/settings.json`,
 enforcing CLAUDE.md rules that can't be trusted to advisory text alone
-(see "Session & instruction hygiene" - zero-exception rules belong in
-hooks, not prose):
+(see [guides/session-hygiene.md](./guides/session-hygiene.md) -
+zero-exception rules belong in hooks, not prose):
 
 - `block-main-mutations.js` - blocks `Edit`/`Write`/`NotebookEdit` and
   `git commit` while the current branch is `main`/`master`, enforcing
   "branch before editing" in every mode. Exempts Mode 1 planning
-  artifacts (`SPEC.md`, `plans/<task-name>.md`), which CLAUDE.md
-  explicitly allows to be written before a branch exists.
+  artifacts (`SPEC.md`, `plans/<task-name>.md`), which Mode 1
+  ([guides/working-modes.md](./guides/working-modes.md)) explicitly
+  allows to be written before a branch exists.
 - `stage-ideas-md.js` - before every `git commit`, auto-stages `IDEAS.md`
   if it has pending changes, so manual edits made outside a Claude
   session (`IDEAS.md` is the user's own space) always make it into the
