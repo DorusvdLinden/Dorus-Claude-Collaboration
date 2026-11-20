@@ -50,6 +50,8 @@ in the first session.
   secrets: ~/.claude/guides/deployment.md
 
 ## Decisions
+- Ask questions via the multiple-choice question tool (AskUserQuestion),
+  not as free text in a reply.
 - Ask on genuine forks (architecture, ambiguous requirement, risk to
   something live); otherwise pick a reasonable default, state it, go on.
 - Cheap, reversible experiment: try it and roll back if wrong.
@@ -60,7 +62,8 @@ in the first session.
 ## Working modes
 - Mode 1 Plan ("plan", or ambiguous / architectural / hard-to-reverse):
   no implementation until the plan is confirmed; save it to
-  plans/<task>.md.
+  plans/<task>.md. Stay in plan mode until an explicit "execute the
+  plan" request; answering questions or approving parts is not that.
 - Mode 2 Build (default): feature branch, reversible changes without
   asking, fresh-context subagent review of non-trivial diffs.
 - Mode 3 Away ("I'll be away", scheduled runs): own branch, real forks
