@@ -1,16 +1,17 @@
 # Working modes
 
-Read when entering Mode 1 (Plan) or Mode 3 (Away). Moved verbatim from
-`~/.claude/CLAUDE.md` on 2026-11-11.
+Read when entering Mode 1 (Plan), Mode 1b (Design) or Mode 3 (Away).
+Moved verbatim from `~/.claude/CLAUDE.md` on 2026-11-11; Mode 1b added
+2026-11-20.
 
-Three explicit modes govern how much I act before checking in. Default is
+Four explicit modes govern how much I act before checking in. Default is
 Mode 2 unless you say otherwise or the task itself calls for a different
 one. The modes change *when* confirmation happens, not whether the rest of
 this file's safety rules (destructive-action confirmation, branch-before-
-editing, merge-to-main only when asked) apply - those hold in all three.
+editing, merge-to-main only when asked) apply - those hold in all of them.
 Commit/push to the working branch is standing-authorized in every mode
-(Mode 1 only after its plan is confirmed) - merging to `main` always
-stays gated regardless of mode, see below.
+(Mode 1 only after its plan is confirmed; Mode 1b for its design artifacts)
+- merging to `main` always stays gated regardless of mode, see below.
 
 ## Mode 1 - Plan (deliberate)
 
@@ -41,6 +42,42 @@ architecturally significant / ambiguous / hard-to-reverse work.
   `plans/<task-name>.md` in the repo as the durable record, not just
   Claude Code's internal plan-mode state - then move into Mode 2 to
   execute it.
+
+## Mode 1b - Design (structure, no logic)
+
+Trigger: "design mode". Sits between Plan and Build: the plan becomes a
+skeleton in the repo, but nothing works yet. Usually follows a Mode 1 plan;
+can be combined with Mode 3 (away) like Plan can.
+
+Allowed (and expected):
+- Own branch (e.g. `design/<task>`); commit and push the design artifacts
+  as they are made.
+- Folder structure, with a short README per module: what it is for, what
+  it may depend on, what it must not touch.
+- Types and interfaces with full signatures; functions as stubs whose body
+  only throws `not implemented` (or the language's equivalent).
+- Data formats: database tables, file/backup formats, settings with their
+  defaults, state machines (states + transitions as typed tables), IPC /
+  API contracts, error cases.
+- Test files with the test names written and marked todo/skip, plus
+  fixtures from real data (sampled, read-only).
+- Diagrams (Mermaid) and decisions (CHANGES.md); the plan updated to match
+  the design, open questions listed.
+- Proof the skeleton holds: it type-checks / compiles, and the test runner
+  runs (all tests todo/skipped, none failing). The project's existing
+  regression check must stay green.
+
+Not allowed:
+- Working logic (beyond trivial constants, defaults and type guards needed
+  to type-check).
+- Network calls other than read-only research; changing settings of other
+  programs; installing software; building or packaging releases.
+- Adding dependencies for real - list them in the design (name, version,
+  why) and install in Build.
+
+Exit: an explicit "execute" / "build" moves to Mode 2, which fills in the
+stubs and turns the todo tests into real ones. Answering design questions
+or approving parts of the design is not that.
 
 ## Mode 2 - Build (default)
 
@@ -126,11 +163,16 @@ runs.
 
 - Ambiguous requirements, new architecture, hard-to-reverse work ->
   start in Mode 1 even if not explicitly requested.
+- A confirmed plan for a new app/module with many parts, where seeing the
+  structure first is cheaper than reworking code -> offer Mode 1b (only
+  enter it when asked).
 - Routine implementation, bug fixes, well-scoped tasks -> Mode 2.
 - Stepping away, overnight/weekend runs, cron/scheduled work -> Mode 3.
 
 ## Decision defaults per mode
 
-- "Ask when it's a genuine fork" is Mode 1's norm and Mode 2's fallback;
+- "Ask when it's a genuine fork" is Mode 1's and Mode 1b's norm (in 1b,
+  record the fork in the design as an open question with a recommended
+  default rather than stubbing both) and Mode 2's fallback;
   Mode 3 defers most forks to a multiple-version build and an
   end-of-session debrief instead of asking mid-session.
