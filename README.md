@@ -14,8 +14,8 @@ Each section points to a guide for the detail.
 [guides/](./guides/) - the situational detail, read on demand when its
 trigger applies (not loaded automatically):
 
-- [working-modes.md](./guides/working-modes.md) - full Plan / Build /
-  Away rules, mode-fit defaults; read when entering Mode 1 or 3.
+- [working-modes.md](./guides/working-modes.md) - full Plan / Design /
+  Build / Away rules, mode-fit defaults; read when entering Mode 1, 1b or 3.
 - [deployment.md](./guides/deployment.md) - "a push isn't a deploy" for
   long-running processes, scoped edits on files holding secrets, NAS
   dashboard, container privilege-drop gotchas (PATH loss on `su`,

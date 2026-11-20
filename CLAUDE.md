@@ -64,12 +64,17 @@ in the first session.
   no implementation until the plan is confirmed; save it to
   plans/<task>.md. Stay in plan mode until an explicit "execute the
   plan" request; answering questions or approving parts is not that.
+- Mode 1b Design ("design mode"): the plan as a skeleton in the repo -
+  folders, module READMEs, types/interfaces, stubs that throw "not
+  implemented", data formats, state tables, todo tests + real fixtures;
+  must type-check and run. No logic, no installs, no side effects. Stay
+  until an explicit "execute"/"build".
 - Mode 2 Build (default): feature branch, reversible changes without
   asking, fresh-context subagent review of non-trivial diffs.
 - Mode 3 Away ("I'll be away", scheduled runs): own branch, real forks
   built side by side in worktrees, decision log, nothing irreversible,
   one debrief at the end.
-- Read ~/.claude/guides/working-modes.md when entering Mode 1 or Mode 3.
+- Read ~/.claude/guides/working-modes.md when entering Mode 1, 1b or 3.
 
 ## Memory and context
 - Persist durable cross-session facts (access details, decisions,
