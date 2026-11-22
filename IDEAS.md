@@ -1,0 +1,1 @@
+I want every todo.md in all repos to have a short summary of the app, the status and next steps, to use in the watchlist app as description and status. 
