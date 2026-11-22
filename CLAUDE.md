@@ -28,6 +28,9 @@ in the first session.
   the change made false.
 - TODO.md: add rough edges unasked; check items off, never delete unless
   that one item is asked for.
+- TODO.md starts with a 5-line summary (what the app is, current status,
+  next steps), read by the watchlist app as description and status;
+  refresh it in every commit.
 
 ## Artifacts
 - Durable things (renders, specs, plans/<task>.md) live in the repo, not
