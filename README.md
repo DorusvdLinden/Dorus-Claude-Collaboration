@@ -95,7 +95,7 @@ so commits from Windows stop producing whole-file CRLF diffs and
   `.gitattributes` into each repo (so Pi/NAS/GitHub clones agree).
 - [setup-line-endings.sh](./git/setup-line-endings.sh) - one-time machine
   setup: copies the policy and sets `core.autocrlf=false`, `core.eol=lf`,
-  `core.attributesFile`. Also set VS Code `"files.eol": "\n"`.
+  `core.attributesFile` (plus `core.longpaths=true` for deep Windows paths). Also set VS Code `"files.eol": "\n"`.
 - [normalize-repo.sh](./git/normalize-repo.sh) `<repo> [--push]` - one-off
   fix for a repo that already holds CRLF: on branch
   `chore/normalize-line-endings` in a temporary worktree it adds/upgrades

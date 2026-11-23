@@ -14,6 +14,8 @@ cp "$here/attributes" ~/.config/git/attributes
 git config --global core.attributesFile "~/.config/git/attributes"
 git config --global core.autocrlf false
 git config --global core.eol lf
+# Windows: allow paths over 260 chars (worktrees/checkouts fail otherwise).
+git config --global core.longpaths true
 
 echo "Global git line-ending config:"
 git config --global --get-regexp '^core\.(autocrlf|eol|attributesfile)$'
