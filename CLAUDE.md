@@ -49,6 +49,9 @@ in the first session.
   discarding work, deleting unmerged branches); one approval doesn't
   cover the next.
 - Reuse machine-level git/gh auth (check `gh auth status` first).
+- Line endings are LF, set machine-wide (Dorus-Claude-Collaboration/git/).
+  Every repo gets that .gitattributes in its first commit; an old repo
+  with CRLF gets git/normalize-repo.sh once. Never hand-fix EOL diffs.
 - Docker/NAS deploys, long-running processes, remote files holding
   secrets: ~/.claude/guides/deployment.md
 

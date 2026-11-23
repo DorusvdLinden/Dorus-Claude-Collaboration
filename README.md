@@ -85,6 +85,24 @@ live - this is a manually-synced reference copy, the same pattern as the
 `CLAUDE.md` copy above. After changing a hook, copy the file to (or from)
 `~/.claude/hooks/` to keep the two in sync.
 
+**Line endings**: [git/](./git/) makes every repo on the machine use LF,
+so commits from Windows stop producing whole-file CRLF diffs and
+"LF/CRLF will be replaced" warnings:
+
+- [attributes](./git/attributes) - the policy: `* text=auto eol=lf`,
+  CRLF only for `.bat`/`.cmd`, common binaries marked `binary`. Installed
+  as the global fallback `~/.config/git/attributes` and copied as
+  `.gitattributes` into each repo (so Pi/NAS/GitHub clones agree).
+- [setup-line-endings.sh](./git/setup-line-endings.sh) - one-time machine
+  setup: copies the policy and sets `core.autocrlf=false`, `core.eol=lf`,
+  `core.attributesFile`. Also set VS Code `"files.eol": "\n"`.
+- [normalize-repo.sh](./git/normalize-repo.sh) `<repo> [--push]` - one-off
+  fix for a repo that already holds CRLF: on branch
+  `chore/normalize-line-endings` in a temporary worktree it adds/upgrades
+  `.gitattributes`, runs `git add --renormalize .` and commits (content
+  unchanged apart from EOL); then, if the checkout is clean, rewrites
+  CRLF working files as LF. Merge the branch like any other.
+
 ## Origin
 
 Started while working on
